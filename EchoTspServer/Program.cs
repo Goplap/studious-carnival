@@ -17,7 +17,7 @@ namespace EchoServer
     public class EchoServer
     {
         private readonly int _port;
-        private TcpListener _listener;
+        private TcpListener? _listener;
         readonly CancellationTokenSource _cancellationTokenSource;
 
 
@@ -83,7 +83,7 @@ namespace EchoServer
         public void Stop()
         {
             _cancellationTokenSource.Cancel();
-            _listener.Stop();
+            _listener?.Stop();
             _cancellationTokenSource.Dispose();
             Console.WriteLine("Server stopped.");
         }
