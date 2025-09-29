@@ -18,7 +18,7 @@ namespace EchoServer
     {
         private readonly int _port;
         private TcpListener _listener;
-        private CancellationTokenSource _cancellationTokenSource;
+        readonly CancellationTokenSource _cancellationTokenSource;
 
 
         public EchoServer(int port)
