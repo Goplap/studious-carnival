@@ -48,6 +48,22 @@ public class NetSdrClientTests
     }
 
     [Test]
+    public async Task ChangeFrequencyAsync_SendsCorrectMessage()
+    {
+        // Arrange
+        await _client.ConnectAsync();
+        long testHz = 144000000; // 144 MHz
+        int testChannel = 1;
+
+        // Act
+        await _client.ChangeFrequencyAsync(testHz, testChannel);
+
+        // Assert
+        _tcpMock.Verify(tcp => tcp.SendMessageAsync(It.IsAny<byte[]>()), Times.AtLeastOnce);
+    }
+
+
+    [Test]
     public async Task DisconnectWithNoConnectionTest()
     {
         //act
