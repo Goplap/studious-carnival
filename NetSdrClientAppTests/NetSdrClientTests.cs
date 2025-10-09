@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NetSdrClientApp;
+using NetSdrClientApp.Messages;
 using NetSdrClientApp.Networking;
 
 namespace NetSdrClientAppTests;
@@ -60,6 +61,34 @@ public class NetSdrClientTests
 
         // Assert
         _tcpMock.Verify(tcp => tcp.SendMessageAsync(It.IsAny<byte[]>()), Times.AtLeastOnce);
+    }
+
+    [Test]
+    public void GetSamples_ReturnsExpectedSamples()
+    {
+        // Arrange
+        byte[] body = { 0x01, 0x00, 0x02, 0x00 }; // два зразки: 1 і 2
+
+        // Act
+        var samples = NetSdrMessageHelper.GetSamples(16, body).ToArray();
+
+        // Assert
+        Assert.That(samples.Length, Is.EqualTo(2));
+        Assert.That(samples[0], Is.EqualTo(1));
+        Assert.That(samples[1], Is.EqualTo(2));
+    }
+
+    [Test]
+    public void GetSamples_Throws_OnTooLargeSampleSize()
+    {
+        // Arrange
+        byte[] body = { 0x00, 0x01 };
+
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+        {
+            _ = NetSdrMessageHelper.GetSamples(64, body).ToArray();
+        });
     }
 
 

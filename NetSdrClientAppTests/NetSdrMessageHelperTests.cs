@@ -40,6 +40,25 @@ namespace NetSdrClientAppTests
         }
 
         [Test]
+        public void TranslateMessage_DataItemMessage_ParsesCorrectly()
+        {
+            // Arrange
+            var type = NetSdrMessageHelper.MsgTypes.DataItem1;
+            var parameters = new byte[] { 0x11, 0x22, 0x33 };
+            var msg = NetSdrMessageHelper.GetDataItemMessage(type, parameters);
+
+            // Act
+            var result = NetSdrMessageHelper.TranslateMessage(msg, out var actualType, out var actualCode, out var sequence, out var body);
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.That(actualType, Is.EqualTo(type));
+            Assert.That(actualCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None));
+            Assert.That(sequence, Is.TypeOf<ushort>()); // просто перевірка що є ushort
+            Assert.That(body, Is.Not.Null);
+        }
+
+        [Test]
         public void GetDataItemMessageTest()
         {
             //Arrange
