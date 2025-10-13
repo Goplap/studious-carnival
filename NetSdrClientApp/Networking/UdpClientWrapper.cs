@@ -37,7 +37,7 @@ public class UdpClientWrapper : IUdpClient
         }
         catch (OperationCanceledException)
         {
-            // Listening was cancelled — nothing to do
+            // Операцію скасовано - це нормально
         }
         catch (Exception ex)
         {
@@ -47,21 +47,21 @@ public class UdpClientWrapper : IUdpClient
 
     public void StopListening()
     {
-        StopInternal("Stopped listening for UDP messages.");
+        Cleanup();
     }
 
     public void Exit()
     {
-        StopInternal("Exited UDP client.");
+        Cleanup();
     }
 
-    private void StopInternal(string message)
+    private void Cleanup()
     {
         try
         {
             _cts?.Cancel();
             _udpClient?.Close();
-            Console.WriteLine(message);
+            Console.WriteLine("Stopped listening for UDP messages.");
         }
         catch (Exception ex)
         {
