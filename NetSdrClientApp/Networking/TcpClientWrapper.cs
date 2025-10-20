@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -12,13 +9,13 @@ namespace NetSdrClientApp.Networking
 {
     public class TcpClientWrapper : ITcpClient
     {
-        private string _host;
-        private int _port;
+        private readonly string _host;
+        private readonly int _port;
         private TcpClient? _tcpClient;
         private NetworkStream? _stream;
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource? _cts;
 
-        public bool Connected => _tcpClient != null && _tcpClient.Connected && _stream != null;
+        public bool Connected => _tcpClient?.Connected == true && _stream != null;
 
         public event EventHandler<byte[]>? MessageReceived;
 
@@ -36,13 +33,13 @@ namespace NetSdrClientApp.Networking
                 return;
             }
 
-            _tcpClient = new TcpClient();
-
             try
             {
+                _tcpClient = new TcpClient();
                 _cts = new CancellationTokenSource();
                 _tcpClient.Connect(_host, _port);
                 _stream = _tcpClient.GetStream();
+
                 Console.WriteLine($"Connected to {_host}:{_port}");
                 _ = StartListeningAsync();
             }
@@ -54,87 +51,66 @@ namespace NetSdrClientApp.Networking
 
         public void Disconnect()
         {
-            if (Connected)
-            {
-                _cts?.Cancel();
-                _stream?.Close();
-                _tcpClient?.Close();
-
-                _cts = null;
-                _tcpClient = null;
-                _stream = null;
-                Console.WriteLine("Disconnected.");
-            }
-            else
+            if (!Connected)
             {
                 Console.WriteLine("No active connection to disconnect.");
+                return;
             }
+
+            _cts?.Cancel();
+            _stream?.Close();
+            _tcpClient?.Close();
+
+            _cts = null;
+            _tcpClient = null;
+            _stream = null;
+
+            Console.WriteLine("Disconnected.");
         }
+
+        public Task SendMessageAsync(string message) =>
+            SendMessageAsync(Encoding.UTF8.GetBytes(message));
 
         public async Task SendMessageAsync(byte[] data)
         {
-            if (Connected && _stream != null && _stream.CanWrite)
-            {
-                Console.WriteLine($"Message sent: " + data.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
-                await _stream.WriteAsync(data, 0, data.Length);
-            }
-            else
-            {
+            if (!Connected || _stream is not { CanWrite: true })
                 throw new InvalidOperationException("Not connected to a server.");
-            }
-        }
 
-        public async Task SendMessageAsync(string str)
-        {
-            var data = Encoding.UTF8.GetBytes(str);
-            if (Connected && _stream != null && _stream.CanWrite)
-            {
-                Console.WriteLine($"Message sent: " + data.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
-                await _stream.WriteAsync(data, 0, data.Length);
-            }
-            else
-            {
-                throw new InvalidOperationException("Not connected to a server.");
-            }
+            Console.WriteLine($"Message sent: {BitConverter.ToString(data).Replace("-", " ")}");
+            await _stream.WriteAsync(data, 0, data.Length);
         }
 
         private async Task StartListeningAsync()
         {
-            if (Connected && _stream != null && _stream.CanRead)
+            if (!Connected || _stream is not { CanRead: true })
+                throw new InvalidOperationException("Not connected to a server.");
+
+            Console.WriteLine("Starting listening for incoming messages.");
+
+            try
             {
-                try
+                var buffer = new byte[8192];
+                while (!_cts!.Token.IsCancellationRequested)
                 {
-                    Console.WriteLine($"Starting listening for incomming messages.");
-
-                    while (!_cts.Token.IsCancellationRequested)
+                    int bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length, _cts.Token);
+                    if (bytesRead > 0)
                     {
-                        byte[] buffer = new byte[8194];
-
-                        int bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length, _cts.Token);
-                        if (bytesRead > 0)
-                        {
-                            MessageReceived?.Invoke(this, buffer.AsSpan(0, bytesRead).ToArray());
-                        }
+                        MessageReceived?.Invoke(this, buffer[..bytesRead]);
                     }
                 }
-                catch (OperationCanceledException ex)
-                {
-                    //empty
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error in listening loop: {ex.Message}");
-                }
-                finally
-                {
-                    Console.WriteLine("Listener stopped.");
-                }
             }
-            else
+            catch (OperationCanceledException)
             {
-                throw new InvalidOperationException("Not connected to a server.");
+                // Expected when disconnecting
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in listening loop: {ex.Message}");
+            }
+            finally
+            {
+                Console.WriteLine("Listener stopped.");
             }
         }
     }
-
 }
