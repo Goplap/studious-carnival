@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 /// </summary>
 /// 
 
-namespace EchoServer
+namespace EchoTspServer
 {
 
     public class EchoServer
