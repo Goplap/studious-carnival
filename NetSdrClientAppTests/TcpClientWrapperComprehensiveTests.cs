@@ -7,14 +7,29 @@ namespace NetSdrClientAppTests;
 public class TcpClientWrapperComprehensiveTests
 {
     private const int TestPort = 55555;
+#pragma warning disable NUnit1032 // An IDisposable field/property should be Disposed in a TearDown method
     private TcpListener? _testServer;
+#pragma warning restore NUnit1032 // An IDisposable field/property should be Disposed in a TearDown method
 
     [TearDown]
     public void TearDown()
     {
-        _testServer?.Stop();
-        Task.Delay(100).Wait(); // Allow sockets to close
+        try
+        {
+            _testServer?.Stop();
+            _testServer?.Server?.Dispose();
+        }
+        catch
+        {
+            // Ігноруємо винятки при закритті
+        }
+        finally
+        {
+            _testServer = null;
+            Task.Delay(100).Wait(); // даємо сокетам закритися
+        }
     }
+
 
     #region Constructor Tests
 
