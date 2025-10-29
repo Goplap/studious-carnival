@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Moq;
 using System;
 using System.Net.Sockets;
@@ -37,7 +37,10 @@ namespace EchoTspServer.Tests
         [Test]
         public void Constructor_ShouldNotThrow()
         {
-            Assert.DoesNotThrow(() => new EchoServer(_listenerMock.Object, _handlerMock.Object));
+            Assert.That(
+                () => new EchoServer(_listenerMock.Object, _handlerMock.Object),
+                Throws.Nothing
+            );
         }
 
         [Test]
@@ -50,12 +53,14 @@ namespace EchoTspServer.Tests
 
             // Act
             var task = _server.StartAsync();
-
             var finished = await Task.WhenAny(task, Task.Delay(1000));
 
             // Assert
-            Assert.AreEqual(task, finished, "StartAsync не завершився при ObjectDisposedException");
-            _listenerMock.Verify(l => l.Start(), Times.Once);
+            Assert.Multiple(() =>
+            {
+                Assert.That(finished, Is.EqualTo(task), "StartAsync не завершився при ObjectDisposedException");
+                _listenerMock.Verify(l => l.Start(), Times.Once);
+            });
         }
 
         [Test]
@@ -65,8 +70,11 @@ namespace EchoTspServer.Tests
             _listenerMock.Setup(l => l.Stop());
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _server.Stop());
-            Assert.DoesNotThrow(() => _server.Stop());
+            Assert.Multiple(() =>
+            {
+                Assert.That(() => _server.Stop(), Throws.Nothing);
+                Assert.That(() => _server.Stop(), Throws.Nothing);
+            });
 
             _listenerMock.Verify(l => l.Stop(), Times.AtLeastOnce);
         }
