@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace EchoTspServer.Tests.Networking
     public class TcpListenerWrapperTests
     {
         private const int TestPort = 50123;
-        private TcpListenerWrapper _listenerWrapper;
+        private TcpListenerWrapper _listenerWrapper = null!;
 
         [SetUp]
         public void SetUp()
@@ -48,21 +48,17 @@ namespace EchoTspServer.Tests.Networking
         {
             _listenerWrapper.Start();
 
-            // Task, що приймає клієнта
             var acceptTask = _listenerWrapper.AcceptTcpClientAsync();
 
-            // Даємо трішки часу щоб listener запустився
             await Task.Delay(50);
 
-            // Створюємо клієнт і підключаємось
             using var client = new TcpClient();
             await client.ConnectAsync("127.0.0.1", TestPort);
 
-            // Listener має прийняти клієнта
             var acceptedClient = await acceptTask;
 
-            Assert.NotNull(acceptedClient);
-            Assert.IsTrue(acceptedClient.Connected);
+            Assert.That(acceptedClient, Is.Not.Null);
+            Assert.That(acceptedClient!.Connected, Is.True);
 
             acceptedClient.Close();
         }
@@ -70,11 +66,8 @@ namespace EchoTspServer.Tests.Networking
         [Test]
         public void AcceptTcpClientAsync_ShouldThrowIfNotStarted()
         {
-            // Listener ще не стартував
-            Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await _listenerWrapper.AcceptTcpClientAsync();
-            });
+            Assert.That(async () => await _listenerWrapper.AcceptTcpClientAsync(),
+                        Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
