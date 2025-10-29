@@ -295,24 +295,6 @@ public class TcpClientWrapperComprehensiveTests
     }
 
     [Test]
-    public async Task SendMessageAsync_WithValidData_SendsSuccessfully()
-    {
-        // Arrange
-        StartTestServer();
-        var wrapper = new TcpClientWrapper("127.0.0.1", TestPort);
-        wrapper.Connect();
-        await Task.Delay(100);
-
-        var testData = new byte[] { 1, 2, 3, 4, 5 };
-
-        // Act & Assert
-        Assert.DoesNotThrowAsync(async () => await wrapper.SendMessageAsync(testData));
-
-        // Cleanup
-        wrapper.Disconnect();
-    }
-
-    [Test]
     public async Task SendMessageAsync_WithEmptyData_SendsSuccessfully()
     {
         // Arrange

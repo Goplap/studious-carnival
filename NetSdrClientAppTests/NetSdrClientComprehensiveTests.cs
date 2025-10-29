@@ -150,7 +150,7 @@ public class NetSdrClientComprehensiveTests
     public void Disconnect_CallsTcpDisconnect()
     {
         // Act
-        _client.Disconect();
+        _client.Disconnect();
 
         // Assert
         _tcpMock.Verify(tcp => tcp.Disconnect(), Times.Once);
@@ -163,7 +163,7 @@ public class NetSdrClientComprehensiveTests
         await ConnectClient();
 
         // Act
-        _client.Disconect();
+        _client.Disconnect();
 
         // Assert
         _tcpMock.Verify(tcp => tcp.Disconnect(), Times.Once);
@@ -227,7 +227,7 @@ public class NetSdrClientComprehensiveTests
         await _client.ChangeFrequencyAsync(100000000, 1);
         await _client.StartIQAsync();
         await _client.StopIQAsync();
-        _client.Disconect();
+        _client.Disconnect();
 
         // Assert
         _tcpMock.Verify(tcp => tcp.Connect(), Times.Once);
