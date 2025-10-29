@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "k5XjTVLUh7w=",
+  "success": true,
+  "projectFilePath": "D:\\Nau\\3 course\\1 semester (2025-2026)\\Реінжиніринг ПЗ\\лаб 8\\studious-parakeet-master\\studious-parakeet-master\\NetSdrClientApp\\NetSdrClientApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lenovo\\.nuget\\packages\\newtonsoft.json\\13.0.4\\newtonsoft.json.13.0.4.nupkg.sha512",
+    "C:\\Users\\Lenovo\\.nuget\\packages\\sharpziplib\\1.4.2\\sharpziplib.1.4.2.nupkg.sha512"
+  ],
+  "logs": []
+}
