@@ -50,9 +50,9 @@ namespace NetSdrClientApp
             }
         }
 
-        public void Disconnect()
+        public void Disconect()
         {
-            _tcpClient.Disconnect();
+            _tcpClient.Disconect();
         }
 
         public async Task StartIQAsync()
