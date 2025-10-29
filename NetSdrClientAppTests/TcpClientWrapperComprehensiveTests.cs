@@ -298,7 +298,7 @@ public class TcpClientWrapperComprehensiveTests
     public async Task SendMessageAsync_WithEmptyData_SendsSuccessfully()
     {
         // Arrange
-        StartTestServer(); 
+        StartTestServer();
         var wrapper = new TcpClientWrapper("127.0.0.1", TestPort);
         wrapper.Connect();
         await Task.Delay(100);
