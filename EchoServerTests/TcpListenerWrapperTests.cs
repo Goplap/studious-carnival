@@ -27,20 +27,20 @@ namespace EchoTspServer.Tests.Networking
         [Test]
         public void Constructor_ShouldCreateInstanceWithoutException()
         {
-            Assert.DoesNotThrow(() => new TcpListenerWrapper(TestPort));
+            Assert.That(() => new TcpListenerWrapper(TestPort), Throws.Nothing);
         }
 
         [Test]
         public void Start_ShouldStartListenerWithoutException()
         {
-            Assert.DoesNotThrow(() => _listenerWrapper.Start());
+            Assert.That(() => _listenerWrapper.Start(), Throws.Nothing);
         }
 
         [Test]
         public void Stop_ShouldStopListenerWithoutException()
         {
             _listenerWrapper.Start();
-            Assert.DoesNotThrow(() => _listenerWrapper.Stop());
+            Assert.That(() => _listenerWrapper.Stop(), Throws.Nothing);
         }
 
         [Test]
@@ -48,7 +48,6 @@ namespace EchoTspServer.Tests.Networking
         {
             _listenerWrapper.Start();
 
-            // Task, що приймає клієнта
             var acceptTask = _listenerWrapper.AcceptTcpClientAsync();
 
             // Даємо трішки часу щоб listener запустився
@@ -58,11 +57,10 @@ namespace EchoTspServer.Tests.Networking
             using var client = new TcpClient();
             await client.ConnectAsync("127.0.0.1", TestPort);
 
-            // Listener має прийняти клієнта
             var acceptedClient = await acceptTask;
 
-            Assert.NotNull(acceptedClient);
-            Assert.IsTrue(acceptedClient.Connected);
+            Assert.That(acceptedClient, Is.Not.Null);
+            Assert.That(acceptedClient.Connected, Is.True);
 
             acceptedClient.Close();
         }
@@ -70,19 +68,16 @@ namespace EchoTspServer.Tests.Networking
         [Test]
         public void AcceptTcpClientAsync_ShouldThrowIfNotStarted()
         {
-            // Listener ще не стартував
-            Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await _listenerWrapper.AcceptTcpClientAsync();
-            });
+            Assert.That(async () => await _listenerWrapper.AcceptTcpClientAsync(),
+                        Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
         public void Stop_CanBeCalledMultipleTimes()
         {
             _listenerWrapper.Start();
-            Assert.DoesNotThrow(() => _listenerWrapper.Stop());
-            Assert.DoesNotThrow(() => _listenerWrapper.Stop());
+            Assert.That(() => _listenerWrapper.Stop(), Throws.Nothing);
+            Assert.That(() => _listenerWrapper.Stop(), Throws.Nothing);
         }
     }
 }

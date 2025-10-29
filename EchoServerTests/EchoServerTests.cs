@@ -53,8 +53,8 @@ namespace EchoTspServer.Tests
 
             var finished = await Task.WhenAny(task, Task.Delay(1000));
 
-            // Assert
-            Assert.AreEqual(task, finished, "StartAsync не завершився при ObjectDisposedException");
+            // Assert (новий стиль)
+            Assert.That(finished, Is.EqualTo(task), "StartAsync не завершився при ObjectDisposedException");
             _listenerMock.Verify(l => l.Start(), Times.Once);
         }
 

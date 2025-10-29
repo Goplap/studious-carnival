@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace NetSdrClientAppTests
 {
@@ -20,7 +19,8 @@ namespace NetSdrClientAppTests
                 .HaveDependencyOn("EchoTspServer")
                 .GetResult();
 
-            Assert.IsTrue(result.IsSuccessful);
+            // Використовуємо Constraint-based Assert
+            Assert.That(result.IsSuccessful, Is.True);
         }
     }
 }
